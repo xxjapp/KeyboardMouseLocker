@@ -105,6 +105,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
       return FALSE;
    }
 
+   // Set WS_EX_LAYERED on this window
+   SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+
+   // Make this window 50% alpha (debug)
+   SetLayeredWindowAttributes(hWnd, 0, (255 * 50) / 100, LWA_ALPHA);
+
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
