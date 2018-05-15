@@ -155,6 +155,30 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
+LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    PKBDLLHOOKSTRUCT hookstruct;
+
+    if (nCode == HC_ACTION) {
+        switch (wParam) {
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            hookstruct = (PKBDLLHOOKSTRUCT)lParam;
+
+            if (hookstruct->vkCode == 91) {
+                return 1; // Window key
+            } else {
+                return CallNextHookEx(NULL, nCode, wParam, lParam);
+            }
+        }
+    }
+
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
+HHOOK hook_keys;
+
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -169,6 +193,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_CREATE:
+        hook_keys = SetWindowsHookEx(WH_KEYBOARD_LL, LLKeyboardProc, ((LPCREATESTRUCT)lParam)->hInstance, 0);
+        break;
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -195,6 +222,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+        UnhookWindowsHookEx(hook_keys);
         PostQuitMessage(0);
         break;
     default:
