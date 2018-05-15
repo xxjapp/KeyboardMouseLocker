@@ -83,6 +83,41 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
+LONG width(const RECT *rect) {
+    return rect->right - rect->left;
+}
+
+LONG height(const RECT *rect) {
+    return rect->bottom - rect->top;
+}
+
+// SEE: https://blogs.msdn.microsoft.com/oldnewthing/20100412-00/?p=14353/
+
+bool switchFullscreen(HWND hwnd, WINDOWPLACEMENT &wpPrev) {
+    DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
+    bool gotoFullscreen = (dwStyle & WS_OVERLAPPEDWINDOW) != 0;
+
+    if (gotoFullscreen) {
+        MONITORINFO mi = { sizeof(mi) };
+
+        if (GetWindowPlacement(hwnd, &wpPrev) && GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+            SetWindowLong(hwnd, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
+            SetWindowPos(hwnd, HWND_TOP,
+                         mi.rcMonitor.left, mi.rcMonitor.top,
+                         width(&mi.rcMonitor), height(&mi.rcMonitor),
+                         SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+        }
+    } else {
+        SetWindowLong(hwnd, GWL_STYLE, dwStyle | WS_OVERLAPPEDWINDOW);
+        SetWindowPlacement(hwnd, &wpPrev);
+        SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                     SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    }
+
+    return gotoFullscreen;
+}
+
 //
 //   FUNCTION: InitInstance(HINSTANCE, int)
 //
@@ -110,6 +145,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    // Make this window 50% alpha (debug)
    SetLayeredWindowAttributes(hWnd, 0, (255 * 50) / 100, LWA_ALPHA);
+
+   WINDOWPLACEMENT wpPrev;
+   switchFullscreen(hWnd, wpPrev);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
