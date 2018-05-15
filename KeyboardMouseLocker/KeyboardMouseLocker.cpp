@@ -76,7 +76,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_KEYBOARDMOUSELOCKER));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_KEYBOARDMOUSELOCKER);
+    wcex.lpszMenuName   = NULL;
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -143,8 +143,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    // Set WS_EX_LAYERED on this window
    SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
 
-   // Make this window 50% alpha (debug)
-   SetLayeredWindowAttributes(hWnd, 0, (255 * 50) / 100, LWA_ALPHA);
+   // Make window almost transparent
+   SetLayeredWindowAttributes(hWnd, 0, 1, LWA_ALPHA);
 
    WINDOWPLACEMENT wpPrev;
    switchFullscreen(hWnd, wpPrev);
