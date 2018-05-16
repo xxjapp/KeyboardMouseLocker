@@ -195,7 +195,7 @@ LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
     debugPrintf("%s %s vkCode = 0x%X, scanCode = %ld, flags = %ld\n", nCodeStr, wParamStr, hs->vkCode, hs->scanCode, hs->flags);
 
-    if (hs->vkCode == VK_F12 || hs->vkCode == VK_LMENU) {
+    if (hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL) {
         return CallNextHookEx(NULL, nCode, wParam, lParam);
     }
 
