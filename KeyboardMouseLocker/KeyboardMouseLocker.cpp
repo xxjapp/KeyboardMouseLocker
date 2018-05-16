@@ -55,12 +55,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Place code here.
-
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_KEYBOARDMOUSELOCKER, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
+
+    // check if already running
+    HANDLE hMutex = CreateMutex(NULL, TRUE, szTitle);
+
+    if (ERROR_ALREADY_EXISTS == GetLastError()) {
+        // Program already running somewhere
+        return 1; // Exit program
+    }
 
     // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow))
@@ -81,6 +87,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
     }
+
+    ReleaseMutex(hMutex);   // Explicitly release mutex
+    CloseHandle(hMutex);    // close handle before terminating
 
     return (int) msg.wParam;
 }
