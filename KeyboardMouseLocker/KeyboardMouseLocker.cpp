@@ -202,7 +202,7 @@ LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     return 1;
 }
 
-HHOOK hook_keys = NULL;
+HHOOK hookKeys = NULL;
 
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -219,7 +219,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_CREATE:
-        hook_keys = SetWindowsHookEx(WH_KEYBOARD_LL, LLKeyboardProc, ((LPCREATESTRUCT)lParam)->hInstance, 0);
+        hookKeys = SetWindowsHookEx(WH_KEYBOARD_LL, LLKeyboardProc, ((LPCREATESTRUCT)lParam)->hInstance, 0);
         break;
     case WM_COMMAND:
         {
@@ -247,7 +247,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
-        UnhookWindowsHookEx(hook_keys);
+        UnhookWindowsHookEx(hookKeys);
         PostQuitMessage(0);
         break;
     default:
