@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "KeyboardMouseLocker.h"
 
+#include <stdio.h>
+#include <string>
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -16,6 +19,33 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+const std::string currentDateTime() {
+    SYSTEMTIME t;
+    GetLocalTime(&t);
+
+    char currentTime[30] = "";
+    sprintf(currentTime, "%04d-%02d-%02d %02d:%02d:%02d.%03d", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
+
+    return std::string(currentTime);
+}
+
+int __cdecl debugPrintf(const char *format, ...) {
+    char str[1024];
+    snprintf(str, sizeof(str), (currentDateTime() + " ").c_str());
+
+    size_t len0 = strlen(str);
+    char *p = str + len0;
+
+    va_list argptr;
+    va_start(argptr, format);
+    int ret = vsnprintf(p, sizeof(str) - len0, format, argptr);
+    va_end(argptr);
+
+    OutputDebugStringA(str);
+
+    return len0 + ret;
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -149,6 +179,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    WINDOWPLACEMENT wpPrev;
    switchFullscreen(hWnd, wpPrev);
 
+   ShowCursor(FALSE);
+
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -156,28 +188,21 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 }
 
 LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
-    PKBDLLHOOKSTRUCT hookstruct;
+    PKBDLLHOOKSTRUCT hs = (PKBDLLHOOKSTRUCT)lParam;
 
-    if (nCode == HC_ACTION) {
-        switch (wParam) {
-        case WM_KEYDOWN:
-        case WM_SYSKEYDOWN:
-        case WM_KEYUP:
-        case WM_SYSKEYUP:
-            hookstruct = (PKBDLLHOOKSTRUCT)lParam;
+    char *nCodeStr = nCode == HC_ACTION ? "HC_ACTION" : "?";
+    char *wParamStr = wParam == WM_KEYDOWN ? "KD " : (wParam == WM_SYSKEYDOWN ? "SKD" : (wParam == WM_KEYUP ? "KU " : (wParam == WM_SYSKEYUP ? "SKU" : "?")));
 
-            if (hookstruct->vkCode == 91) {
-                return 1; // Window key
-            } else {
-                return CallNextHookEx(NULL, nCode, wParam, lParam);
-            }
-        }
+    debugPrintf("%s %s vkCode = 0x%X, scanCode = %ld, flags = %ld\n", nCodeStr, wParamStr, hs->vkCode, hs->scanCode, hs->flags);
+
+    if (hs->vkCode == VK_F12 || hs->vkCode == VK_LMENU) {
+        return CallNextHookEx(NULL, nCode, wParam, lParam);
     }
 
-    return CallNextHookEx(NULL, nCode, wParam, lParam);
+    return 1;
 }
 
-HHOOK hook_keys;
+HHOOK hook_keys = NULL;
 
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
