@@ -25,7 +25,7 @@ const std::string currentDateTime() {
     GetLocalTime(&t);
 
     char currentTime[30] = "";
-    sprintf(currentTime, "%04d-%02d-%02d %02d:%02d:%02d.%03d", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
+    sprintf_s(currentTime, "%04d-%02d-%02d %02d:%02d:%02d.%03d", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond, t.wMilliseconds);
 
     return std::string(currentTime);
 }
@@ -44,7 +44,7 @@ int __cdecl debugPrintf(const char *format, ...) {
 
     OutputDebugStringA(str);
 
-    return len0 + ret;
+    return int(len0) + ret;
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
