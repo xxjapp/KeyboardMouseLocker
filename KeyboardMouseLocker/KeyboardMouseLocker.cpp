@@ -188,12 +188,22 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 }
 
 LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    static bool ready = false;
+
     PKBDLLHOOKSTRUCT hs = (PKBDLLHOOKSTRUCT)lParam;
 
     char *nCodeStr = nCode == HC_ACTION ? "HC_ACTION" : "?";
     char *wParamStr = wParam == WM_KEYDOWN ? "KD " : (wParam == WM_SYSKEYDOWN ? "SKD" : (wParam == WM_KEYUP ? "KU " : (wParam == WM_SYSKEYUP ? "SKU" : "?")));
 
     debugPrintf("%s %s vkCode = 0x%X, scanCode = %ld, flags = %ld\n", nCodeStr, wParamStr, hs->vkCode, hs->scanCode, hs->flags);
+
+    if (!ready) {
+        if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
+            return CallNextHookEx(NULL, nCode, wParam, lParam);
+        }
+
+        ready = true;
+    }
 
     if (hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL) {
         return CallNextHookEx(NULL, nCode, wParam, lParam);
