@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "KeyboardMouseLocker.h"
+#include "KeyTable.h"
 
 #include <stdio.h>
 #include <string>
