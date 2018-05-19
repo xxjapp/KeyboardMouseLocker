@@ -30,6 +30,24 @@ const std::string currentDateTime() {
     return std::string(currentTime);
 }
 
+void output2File(char* str, size_t size) {
+    static FILE *fp = NULL;
+
+    if (fp == NULL) {
+        errno_t err = fopen_s(&fp, "/tmp/KeyboardMouseLocker.log", "w");
+
+        if (err != 0) {
+            strerror_s(str, size, err);
+            MessageBoxA(NULL, str, NULL, MB_ICONERROR);
+            exit(2);
+        }
+    }
+
+    fputs(str, fp);
+    fflush(fp);
+
+}
+
 int __cdecl debugPrintf(const char *format, ...) {
     char str[1024];
     snprintf(str, sizeof(str), (currentDateTime() + " ").c_str());
@@ -43,6 +61,7 @@ int __cdecl debugPrintf(const char *format, ...) {
     va_end(argptr);
 
     OutputDebugStringA(str);
+    output2File(str, sizeof(str));
 
     return int(len0) + ret;
 }
