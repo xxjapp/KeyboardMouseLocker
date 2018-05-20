@@ -219,27 +219,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-static ULONGLONG time0 = GetTickCount64();
-
 // SEE: Virtual-Key Codes
 // https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
 LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
-    // ready?
-    static bool ready = false;
-
-    if (!ready) {
-        ULONGLONG time1 = GetTickCount64();
-
-        if (time1 - time0 < 1000) {
-            time0 = time1;
-        } else {
-            ready = true;
-        }
-    }
-
     // to enable?
     PKBDLLHOOKSTRUCT hs = (PKBDLLHOOKSTRUCT)lParam;
-    bool enable = !ready || hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL;
+    bool enable = hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL || wParam == WM_KEYUP;
 
     // output log
     char *nCodeStr = nCode == HC_ACTION ? "HC_ACTION" : "?";
@@ -249,15 +234,7 @@ LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
     // enable: call next hook
     // disable: processed
-    LRESULT res = enable ? CallNextHookEx(NULL, nCode, wParam, lParam) : 1;
-
-    // set foreground when WIN key pressed in no ready
-    if (GetForegroundWindow() != hMyWnd) {
-        SetForegroundWindow(hMyWnd);
-        SetWindowPos(hMyWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    }
-
-    return res;
+    return enable ? CallNextHookEx(NULL, nCode, wParam, lParam) : 1;
 }
 
 HHOOK hookKeys = NULL;
