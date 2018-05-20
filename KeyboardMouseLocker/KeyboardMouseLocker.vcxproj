@@ -141,6 +141,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common.h" />
     <ClInclude Include="KeyboardMouseLocker.h" />
     <ClInclude Include="KeyTable.h" />
     <ClInclude Include="Resource.h" />
@@ -148,6 +149,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Common.cpp" />
     <ClCompile Include="KeyboardMouseLocker.cpp" />
     <ClCompile Include="KeyTable.cpp" />
     <ClCompile Include="stdafx.cpp">
