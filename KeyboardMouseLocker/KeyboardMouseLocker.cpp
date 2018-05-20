@@ -12,6 +12,7 @@
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
+HWND hMyWnd;                                    // created window
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
@@ -199,15 +200,17 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
       return FALSE;
    }
 
-   // Set WS_EX_LAYERED on this window
-   SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+   hMyWnd = hWnd;
 
    // Make window almost transparent
+   SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
    SetLayeredWindowAttributes(hWnd, 0, 1, LWA_ALPHA);
 
+   // set full screen
    WINDOWPLACEMENT wpPrev;
    switchFullscreen(hWnd, wpPrev);
 
+   // hide cursor
    ShowCursor(FALSE);
 
    ShowWindow(hWnd, nCmdShow);
@@ -216,29 +219,45 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
+static ULONGLONG time0 = GetTickCount64();
+
+// SEE: Virtual-Key Codes
+// https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
 LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    // ready?
     static bool ready = false;
 
-    PKBDLLHOOKSTRUCT hs = (PKBDLLHOOKSTRUCT)lParam;
+    if (!ready) {
+        ULONGLONG time1 = GetTickCount64();
 
+        if (time1 - time0 < 1000) {
+            time0 = time1;
+        } else {
+            ready = true;
+        }
+    }
+
+    // to enable?
+    PKBDLLHOOKSTRUCT hs = (PKBDLLHOOKSTRUCT)lParam;
+    bool enable = !ready || hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL;
+
+    // output log
     char *nCodeStr = nCode == HC_ACTION ? "HC_ACTION" : "?";
     char *wParamStr = wParam == WM_KEYDOWN ? "KD " : (wParam == WM_SYSKEYDOWN ? "SKD" : (wParam == WM_KEYUP ? "KU " : (wParam == WM_SYSKEYUP ? "SKU" : "?")));
 
-    debugPrintf("%s %s vkCode = 0x%X, scanCode = %ld, flags = %ld\n", nCodeStr, wParamStr, hs->vkCode, hs->scanCode, hs->flags);
+    debugPrintf("%s %s vk = %-12s, scanCode = %ld, flags = %3ld %s\n", nCodeStr, wParamStr, keyTable[hs->vkCode], hs->scanCode, hs->flags, enable ? "" : "[DISABLED]");
 
-    if (!ready) {
-        if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
-            return CallNextHookEx(NULL, nCode, wParam, lParam);
-        }
+    // enable: call next hook
+    // disable: processed
+    LRESULT res = enable ? CallNextHookEx(NULL, nCode, wParam, lParam) : 1;
 
-        ready = true;
+    // set foreground when WIN key pressed in no ready
+    if (GetForegroundWindow() != hMyWnd) {
+        SetForegroundWindow(hMyWnd);
+        SetWindowPos(hMyWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
     }
 
-    if (hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL) {
-        return CallNextHookEx(NULL, nCode, wParam, lParam);
-    }
-
-    return 1;
+    return res;
 }
 
 HHOOK hookKeys = NULL;
@@ -258,6 +277,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_CREATE:
+        debugPrintf("SetWindowsHookEx\n");
         hookKeys = SetWindowsHookEx(WH_KEYBOARD_LL, LLKeyboardProc, ((LPCREATESTRUCT)lParam)->hInstance, 0);
         break;
     case WM_COMMAND:
