@@ -141,7 +141,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK LLKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     // to enable?
     PKBDLLHOOKSTRUCT hs = (PKBDLLHOOKSTRUCT)lParam;
-    bool enable = hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL || wParam == WM_KEYUP;
+    bool enable = hs->vkCode == VK_F12 || hs->vkCode == VK_LCONTROL || hs->vkCode == VK_RCONTROL || wParam == WM_KEYUP;
 
     // output log
     char *nCodeStr = nCode == HC_ACTION ? "HC_ACTION" : "?";
