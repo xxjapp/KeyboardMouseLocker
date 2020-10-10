@@ -61,8 +61,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    ReleaseMutex(hMutex);   // Explicitly release mutex
-    CloseHandle(hMutex);    // close handle before terminating
+    if (hMutex != NULL) {
+        ReleaseMutex(hMutex);   // Explicitly release mutex
+        CloseHandle(hMutex);    // close handle before terminating
+    }
 
     return (int) msg.wParam;
 }

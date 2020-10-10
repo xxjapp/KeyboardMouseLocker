@@ -28,9 +28,10 @@ void output2File(char* str, size_t size) {
         }
     }
 
-    fputs(str, fp);
-    fflush(fp);
-
+    if (fp != NULL) {
+        fputs(str, fp);
+        fflush(fp);
+    }
 }
 
 int __cdecl debugPrintf(const char *format, ...) {
