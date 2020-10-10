@@ -16,7 +16,7 @@ const std::string currentDateTime() {
 }
 
 void output2File(char* str, size_t size) {
-    static FILE *fp = NULL;
+    static FILE* fp = NULL;
 
     if (fp == NULL) {
         errno_t err = fopen_s(&fp, "/tmp/KeyboardMouseLocker.log", "w");
@@ -34,12 +34,12 @@ void output2File(char* str, size_t size) {
     }
 }
 
-int __cdecl debugPrintf(const char *format, ...) {
+int __cdecl debugPrintf(const char* format, ...) {
     char str[1024];
     snprintf(str, sizeof(str), (currentDateTime() + " ").c_str());
 
     size_t len0 = strlen(str);
-    char *p = str + len0;
+    char* p = str + len0;
 
     va_list argptr;
     va_start(argptr, format);
@@ -52,17 +52,17 @@ int __cdecl debugPrintf(const char *format, ...) {
     return int(len0) + ret;
 }
 
-LONG width(const RECT *rect) {
+LONG width(const RECT* rect) {
     return rect->right - rect->left;
 }
 
-LONG height(const RECT *rect) {
+LONG height(const RECT* rect) {
     return rect->bottom - rect->top;
 }
 
 // SEE: https://blogs.msdn.microsoft.com/oldnewthing/20100412-00/?p=14353/
 
-bool switchFullscreen(HWND hwnd, WINDOWPLACEMENT &wpPrev) {
+bool switchFullscreen(HWND hwnd, WINDOWPLACEMENT& wpPrev) {
     DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
     bool gotoFullscreen = (dwStyle & WS_OVERLAPPEDWINDOW) != 0;
 

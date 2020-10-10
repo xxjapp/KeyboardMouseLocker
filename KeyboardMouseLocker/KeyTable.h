@@ -1,3 +1,3 @@
 #pragma once
 
-const char *keyTable[];
+const char* keyTable[];

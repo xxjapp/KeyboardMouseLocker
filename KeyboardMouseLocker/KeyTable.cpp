@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "KeyTable.h"
 
-const char *keyTable[] = {
+const char* keyTable[] = {
     "",
     "Left mouse button",
     "Right mouse button",
