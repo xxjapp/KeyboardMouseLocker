@@ -71,7 +71,7 @@ bool switchFullscreen(HWND hwnd, WINDOWPLACEMENT& wpPrev) {
 
         if (GetWindowPlacement(hwnd, &wpPrev) && GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
             SetWindowLong(hwnd, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
-            SetWindowPos(hwnd, HWND_TOP,
+            SetWindowPos(hwnd, HWND_TOPMOST,
                          mi.rcMonitor.left, mi.rcMonitor.top,
                          width(&mi.rcMonitor), height(&mi.rcMonitor),
                          SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
