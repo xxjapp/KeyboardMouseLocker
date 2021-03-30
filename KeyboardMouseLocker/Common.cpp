@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <string>
 
-const char* logPath = "/tmp/KeyboardMouseLocker.log";
+#include <shlobj_core.h>
+
+const char* logParentPath = "C:/tmp";
+const char* logFileName = "KeyboardMouseLocker.log";
 
 const std::string currentDateTime() {
     SYSTEMTIME t;
@@ -20,6 +23,11 @@ void output2File(char* str, size_t size) {
     static FILE* fp = NULL;
 
     if (fp == NULL) {
+        SHCreateDirectoryExA(NULL, logParentPath, NULL);
+
+        char logPath[260];
+        sprintf_s(logPath, "%s/%s", logParentPath, logFileName);
+
         errno_t err = fopen_s(&fp, logPath, "w");
 
         if (err != 0) {
