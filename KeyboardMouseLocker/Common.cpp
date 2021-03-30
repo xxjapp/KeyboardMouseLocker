@@ -2,8 +2,9 @@
 #include "Common.h"
 
 #include <stdio.h>
-
 #include <string>
+
+const char* logPath = "/tmp/KeyboardMouseLocker.log";
 
 const std::string currentDateTime() {
     SYSTEMTIME t;
@@ -19,11 +20,16 @@ void output2File(char* str, size_t size) {
     static FILE* fp = NULL;
 
     if (fp == NULL) {
-        errno_t err = fopen_s(&fp, "/tmp/KeyboardMouseLocker.log", "w");
+        errno_t err = fopen_s(&fp, logPath, "w");
 
         if (err != 0) {
-            strerror_s(str, size, err);
-            MessageBoxA(NULL, str, NULL, MB_ICONERROR);
+            char errorMsg[1024];
+
+            sprintf_s(errorMsg, "Can not open file %s\n", logPath);
+            strerror_s(errorMsg + strlen(errorMsg), sizeof(errorMsg) - strlen(errorMsg), err);
+
+            MessageBoxA(NULL, errorMsg, NULL, MB_ICONERROR);
+
             exit(2);
         }
     }
